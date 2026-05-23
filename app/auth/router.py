@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends
 from app.core.dependencies import get_current_user
 from app.db.supabase import supabase
 from pydantic import BaseModel
+from typing import Optional
+from enum import Enum
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -11,17 +13,14 @@ class UserGoal(str, Enum):
     build_muscle = "build_muscle"
     maintain = "maintain"
 
-
 class UserFitnessLevel(str, Enum):
     beginner = "beginner"
     intermediate = "intermediate"
     advanced = "advanced"
 
-
 class UserSex(str, Enum):
     male = "male"
     female = "female"
-
 
 class UserProfile(BaseModel):
     name: str
@@ -32,9 +31,8 @@ class UserProfile(BaseModel):
     goal: Optional[UserGoal] = None
     fitness_level: Optional[UserFitnessLevel] = None
 
-
-@router.post("/create-profile")
-def create_profile(
+@router.post("/signup")
+def signup(
     profile: UserProfile,
     user=Depends(get_current_user)
 ):
@@ -42,9 +40,8 @@ def create_profile(
 
     data = {
         "id": user_id,
-        **profile.dict()
+        **profile.model_dump()
     }
 
     result = supabase.table("users").upsert(data).execute()
-
     return result.data

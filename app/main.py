@@ -6,12 +6,15 @@ from app.workout.router import router as workout_router
 from app.workout.logs_router import router as workout_logs_router
 from app.nutrition.router import router as nutrition_router
 from app.progress.router import router as progress_router
+from app.workout.plans_router import router as workout_plans_router
+from app.workout.sessions_router import router as workout_sessions_router
+from app.chat.router import router as chat_router
 
 app = FastAPI(title="Leanup API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,6 +26,9 @@ app.include_router(workout_router)
 app.include_router(workout_logs_router)
 app.include_router(nutrition_router)
 app.include_router(progress_router)
+app.include_router(workout_plans_router)
+app.include_router(workout_sessions_router)
+app.include_router(chat_router)
 
 @app.get("/")
 def root():

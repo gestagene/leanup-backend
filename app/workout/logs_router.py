@@ -4,34 +4,32 @@ from app.db.supabase import supabase
 from pydantic import BaseModel
 from typing import Optional
 
-router = APIRouter(prefix="/workout-logs", tags=["workout-logs"])
+router = APIRouter(prefix="/workout_logs", tags=["workout_logs"])
 
 class WorkoutLog(BaseModel):
     exercise_name: str
     sets: Optional[int] = None
     reps: Optional[int] = None
+    weight_kg: Optional[float] = None  # add this
     duration_minutes: Optional[int] = None
     calories_burned: Optional[float] = None
     notes: Optional[str] = None
 
-# Log a workout
 @router.post("/")
 def log_workout(log: WorkoutLog, user=Depends(get_current_user)):
     user_id = user["sub"]
-    data = {"user_id": user_id, **log.dict()}
-    result = supabase.table("workout-logs").insert(data).execute()
+    data = {"user_id": user_id, **log.model_dump()}
+    result = supabase.table("workout_logs").insert(data).execute()
     return result.data
 
-# Get all workout logs
 @router.get("/")
 def get_workout_logs(user=Depends(get_current_user)):
     user_id = user["sub"]
-    result = supabase.table("workout-logs").select("*").eq("user_id", user_id).order("logged_at", desc=True).execute()
+    result = supabase.table("workout_logs").select("*").eq("user_id", user_id).order("logged_at", desc=True).execute()
     return result.data
 
-# Delete a workout log
 @router.delete("/{log_id}")
 def delete_workout_log(log_id: str, user=Depends(get_current_user)):
     user_id = user["sub"]
-    result = supabase.table("workout-logs").delete().eq("id", log_id).eq("user_id", user_id).execute()
+    supabase.table("workout_logs").delete().eq("id", log_id).eq("user_id", user_id).execute()
     return {"message": "Deleted successfully"}
